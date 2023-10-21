@@ -1,6 +1,10 @@
 .game {
   margin: 50px auto;
 }
+.game-board {
+  margin-bottom: 20px;
+}
+
 .status {
   margin-bottom: 30px;
   font-size: 24px;
@@ -29,6 +33,9 @@
   background-color: #c8e7fa;
 }
 
+.game-info {
+  text-align: center;
+}
 
 .game-info-list {
   padding: 0;
@@ -60,4 +67,23 @@
 
 .game-info-btn.current-move {
   background-color: #d7d7d7;
+}
+
+.toggle-button {
+  background-color: #8affc1;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-align: center;
+  display: inline-block;
+}
+
+.toggle-button:hover {
+  background-color: #45ff9c;
+}
+.square.winning {
+  background-color: yellow;
 }

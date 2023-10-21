@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import './App.css';
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, isWinningSquare }) {
+  const className = isWinningSquare ? 'square winning' : 'square';
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button className={className} onClick={onSquareClick}>
       {value}
     </button>
   );
@@ -20,9 +21,10 @@ function Board({ xIsNext, squares, onPlay }) {
   }
 
   const winner = calculateWinner(squares);
+  const winningLine = winner ? winner.winningLine : null;
   let status;
   if (winner) {
-    status = 'Winner: ' + winner;
+    status = 'Winner: ' + winner.winner;
   } else {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
@@ -32,11 +34,13 @@ function Board({ xIsNext, squares, onPlay }) {
     const squaresInRow = [];
     for (let col = 0; col < 3; col++) {
       const squareIndex = row * 3 + col;
+      const isWinningSquare = winningLine && winningLine.includes(squareIndex);
       squaresInRow.push(
         <Square
           key={squareIndex}
           value={squares[squareIndex]}
           onSquareClick={() => handleClick(squareIndex)}
+          isWinningSquare={isWinningSquare}
         />
       );
     }
@@ -58,6 +62,7 @@ function Board({ xIsNext, squares, onPlay }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  const [isAscending, setIsAscending] = useState(true);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -83,13 +88,20 @@ export default function Game() {
     );
   });
 
+  function toggleSortOrder() {
+    setIsAscending(prevIsAscending => !prevIsAscending);
+  }
+
+  const sortedMoves = isAscending ? moves : moves.slice().reverse();
+
   return (
     <div className="game">
       <div className="game-board">
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <ol className="game-info-list">{moves}</ol>
+        <button className="toggle-button"  onClick={toggleSortOrder}>Toggle Sort Order</button>
+        <ol className="game-info-list">{sortedMoves}</ol>
       </div>
     </div>
   );
@@ -109,7 +121,7 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return {winner: squares[a], winningLine: lines[i]};
     }
   }
   return null;
