@@ -12,12 +12,14 @@ function Square({ value, onSquareClick, isWinningSquare }) {
 
 function Board({ xIsNext, squares, onPlay }) {
   function handleClick(i) {
+    const row = Math.floor(i / 3);
+    const col = i % 3;
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? 'X' : 'O';
-    onPlay(nextSquares);
+    onPlay(nextSquares, { row, col });
   }
 
   const winner = calculateWinner(squares);
@@ -60,14 +62,14 @@ function Board({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [history, setHistory] = useState([{ squares: Array(9).fill(null), position: null }]);
   const [currentMove, setCurrentMove] = useState(0);
   const [isAscending, setIsAscending] = useState(true);
   const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].squares;
 
-  function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextSquares, position) {
+    const nextHistory = [...history.slice(0, currentMove + 1), { squares: nextSquares, position }];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -76,9 +78,12 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
-  const moves = history.map((squares, move) => {
-    const description = move > 0 ? 'Go to move #' + move : 'Go to game start';
-    const buttonClass = move === currentMove ? 'game-info-btn current-move' : 'game-info-btn';
+  const moves = history.map((step, move) => {
+    const { row, col } = step.position || {};
+    const description = move > 0
+      ? 'Go to move #' + move + ` (row: ${row}, col: ${col})`
+      : 'Go to game start';
+      const buttonClass = move === currentMove ? 'game-info-btn current-move' : 'game-info-btn';
     return (
       <li className="game-info-item" key={move}>
         <button className={buttonClass} onClick={() => jumpTo(move)}>
@@ -97,7 +102,7 @@ export default function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+      <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
         <button className="toggle-button"  onClick={toggleSortOrder}>Toggle Sort Order</button>
